@@ -1,6 +1,5 @@
 import React from "react";
 import { Pressable, Text, StyleSheet, View } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "../theme";
 
@@ -33,12 +32,7 @@ export default function LessonCard({ lesson, onPress }) {
 
   return (
     <Pressable style={styles.container} onPress={onPress}>
-      <LinearGradient
-        colors={theme.colors.gradient.primary}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.gradient}
-      >
+      <View style={[styles.gradient, { backgroundColor: theme.colors.primary }]}>
         <View style={styles.content}>
           <View style={styles.header}>
             <View style={styles.iconContainer}>
@@ -52,9 +46,9 @@ export default function LessonCard({ lesson, onPress }) {
               <Text style={styles.levelText}>{lesson.level}</Text>
             </View>
           </View>
-
+          
           <Text style={styles.title}>{lesson.title}</Text>
-
+          
           <View style={styles.footer}>
             <View style={styles.durationContainer}>
               <Ionicons name="time-outline" size={16} color="#FFFFFF" />
@@ -63,7 +57,7 @@ export default function LessonCard({ lesson, onPress }) {
             <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
           </View>
         </View>
-      </LinearGradient>
+      </View>
     </Pressable>
   );
 }

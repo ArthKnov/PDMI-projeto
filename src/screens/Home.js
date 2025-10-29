@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "../theme";
 
@@ -25,13 +24,8 @@ export default function Home({ navigation }) {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header com gradiente */}
-      <LinearGradient
-        colors={theme.colors.gradient.primary}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
         <View style={styles.headerContent}>
           <Text style={styles.greeting}>Olá! 👋</Text>
           <Text style={styles.title}>Bem-vindo ao FitApp</Text>
@@ -40,23 +34,18 @@ export default function Home({ navigation }) {
         <View style={styles.headerIcon}>
           <Ionicons name="fitness" size={40} color="#FFFFFF" />
         </View>
-      </LinearGradient>
+      </View>
 
       {/* Botão principal */}
       <View style={styles.mainActionContainer}>
         <Pressable
-          style={styles.mainButton}
+          style={[styles.mainButton, { backgroundColor: theme.colors.accent }]}
           onPress={() => navigation.navigate("Aulas")}
         >
-          <LinearGradient
-            colors={theme.colors.gradient.secondary}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.mainButtonGradient}
-          >
+          <View style={styles.mainButtonContent}>
             <Ionicons name="play-circle" size={24} color="#FFFFFF" />
             <Text style={styles.mainButtonText}>Começar Treino</Text>
-          </LinearGradient>
+          </View>
         </Pressable>
       </View>
 
@@ -149,7 +138,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.lg,
     ...theme.shadows.md,
   },
-  mainButtonGradient: {
+  mainButtonContent: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
