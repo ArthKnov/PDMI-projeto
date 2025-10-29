@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import LessonCard from "../components/LessonCard";
 import { theme } from "../theme";
@@ -69,12 +68,7 @@ export default function Lessons({ navigation }) {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <LinearGradient
-        colors={theme.colors.gradient.ocean}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
+      <View style={[styles.header, { backgroundColor: theme.colors.accent }]}>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Aulas Disponíveis</Text>
           <Text style={styles.headerSubtitle}>
@@ -84,7 +78,7 @@ export default function Lessons({ navigation }) {
         <View style={styles.headerIcon}>
           <Ionicons name="library-outline" size={32} color="#FFFFFF" />
         </View>
-      </LinearGradient>
+      </View>
 
       {/* Categories Filter */}
       <View style={styles.categoriesContainer}>

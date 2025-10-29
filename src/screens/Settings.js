@@ -96,13 +96,8 @@ export default function Settings() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header com gradiente */}
-      <LinearGradient
-        colors={theme.colors.gradient.primary}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
         <View style={styles.headerContent}>
           <View style={styles.headerIcon}>
             <Ionicons name="settings" size={32} color="#FFFFFF" />
@@ -110,7 +105,7 @@ export default function Settings() {
           <Text style={styles.headerTitle}>Configurações</Text>
           <Text style={styles.headerSubtitle}>Personalize sua experiência</Text>
         </View>
-      </LinearGradient>
+      </View>
 
       {/* Settings Sections */}
       {settingsSections.map((section, sectionIndex) => (

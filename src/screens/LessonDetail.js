@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "../theme";
 
@@ -20,13 +19,8 @@ export default function LessonDetail({ route, navigation }) {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header com gradiente */}
-      <LinearGradient
-        colors={theme.colors.gradient.sunset}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: theme.colors.warning }]}>
         <View style={styles.headerContent}>
           <Pressable
             style={styles.backButton}
@@ -43,7 +37,7 @@ export default function LessonDetail({ route, navigation }) {
             </Text>
           </View>
         </View>
-      </LinearGradient>
+      </View>
 
       {/* Features Grid */}
       <View style={styles.featuresContainer}>
@@ -104,15 +98,15 @@ export default function LessonDetail({ route, navigation }) {
       {/* Action Buttons */}
       <View style={styles.actionsContainer}>
         <Pressable style={styles.startButton}>
-          <LinearGradient
-            colors={theme.colors.gradient.primary}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.startButtonGradient}
+          <View
+            style={[
+              styles.startButtonGradient,
+              { backgroundColor: theme.colors.primary },
+            ]}
           >
             <Ionicons name="play" size={24} color="#FFFFFF" />
             <Text style={styles.startButtonText}>Começar Aula</Text>
-          </LinearGradient>
+          </View>
         </Pressable>
 
         <Pressable style={styles.favoriteButton}>

@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "../theme";
 
@@ -63,12 +62,9 @@ export default function Profile() {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header com gradiente */}
-      <LinearGradient
-        colors={theme.colors.gradient.secondary}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
+      {/* Header */}
+      <View
+        style={[styles.header, { backgroundColor: theme.colors.secondary }]}
       >
         <View style={styles.headerContent}>
           <View style={styles.avatarContainer}>
@@ -88,7 +84,7 @@ export default function Profile() {
             <Text style={styles.levelText}>Nível Intermediário</Text>
           </View>
         </View>
-      </LinearGradient>
+      </View>
 
       {/* Stats Grid */}
       <View style={styles.statsContainer}>
