@@ -1,7 +1,7 @@
 import React from "react";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
-import RootNavigator from "./navigation";
-import { theme } from "./theme";
+import RootNavigator from "./src/navigation";
+import { theme } from "./src/theme";
 
 const navTheme = {
   ...DefaultTheme,
