@@ -7,14 +7,27 @@ import {
   Pressable,
   Switch,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "../theme";
+import { loadSettings, saveSettings } from "../storage/storage";
 
 export default function Settings() {
   const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
   const [darkModeEnabled, setDarkModeEnabled] = React.useState(false);
   const [soundEnabled, setSoundEnabled] = React.useState(true);
+
+  React.useEffect(() => {
+    (async () => {
+      const s = await loadSettings();
+      setNotificationsEnabled(!!s.notificationsEnabled);
+      setDarkModeEnabled(!!s.darkModeEnabled);
+      setSoundEnabled(!!s.soundEnabled);
+    })();
+  }, []);
+
+  React.useEffect(() => {
+    saveSettings({ notificationsEnabled, darkModeEnabled, soundEnabled });
+  }, [notificationsEnabled, darkModeEnabled, soundEnabled]);
 
   const settingsSections = [
     {

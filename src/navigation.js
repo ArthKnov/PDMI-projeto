@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, ActivityIndicator } from "react-native";
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
@@ -9,18 +9,21 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 
-import Home from "./screens/Home";
-import Lessons from "./screens/Lessons";
-import LessonDetail from "./screens/LessonDetail";
+import Login from "./screens/Login";
+import Courses from "./screens/Courses";
 import Profile from "./screens/Profile";
 import Settings from "./screens/Settings";
+import Items from "./screens/Items";
+import ItemDetail from "./screens/ItemDetail";
+import { loadUser, logout } from "./storage/storage";
 import { theme } from "./theme";
 
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-function LessonsStack() {
+// Stack para Itens (CASE de persistência)
+function ItemsStack() {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -34,22 +37,21 @@ function LessonsStack() {
       }}
     >
       <Stack.Screen
-        name="ListaAulas"
-        component={Lessons}
-        options={{ title: "Aulas" }}
+        name="ListaItens"
+        component={Items}
+        options={{ title: "Itens" }}
       />
       <Stack.Screen
-        name="DetalheAula"
-        component={LessonDetail}
-        options={({ route }) => ({
-          title: route.params?.lesson?.title ?? "Detalhe da Aula",
-        })}
+        name="DetalheItem"
+        component={ItemDetail}
+        options={{ title: "Editar Item" }}
       />
     </Stack.Navigator>
   );
 }
 
-function HomeStack() {
+// Stack para Cursos
+function CoursesStack() {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -63,14 +65,15 @@ function HomeStack() {
       }}
     >
       <Stack.Screen
-        name="Home"
-        component={Home}
-        options={{ title: "Início" }}
+        name="ListaCursos"
+        component={Courses}
+        options={{ title: "Cursos" }}
       />
     </Stack.Navigator>
   );
 }
 
+// Stack para Perfil
 function ProfileStack() {
   return (
     <Stack.Navigator
@@ -84,11 +87,16 @@ function ProfileStack() {
         },
       }}
     >
-      <Stack.Screen name="Perfil" component={Profile} />
+      <Stack.Screen
+        name="MeuPerfil"
+        component={Profile}
+        options={{ title: "Perfil" }}
+      />
     </Stack.Navigator>
   );
 }
 
+// Tabs Navigator
 function TabsNavigator() {
   return (
     <Tab.Navigator
@@ -113,20 +121,20 @@ function TabsNavigator() {
       }}
     >
       <Tab.Screen
-        name="Início"
-        component={HomeStack}
+        name="Cursos"
+        component={CoursesStack}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+            <Ionicons name="school" size={size} color={color} />
           ),
         }}
       />
       <Tab.Screen
-        name="Aulas"
-        component={LessonsStack}
+        name="Itens"
+        component={ItemsStack}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="library" size={size} color={color} />
+            <Ionicons name="list" size={size} color={color} />
           ),
         }}
       />
@@ -143,7 +151,13 @@ function TabsNavigator() {
   );
 }
 
+// Custom Drawer Content
 function CustomDrawerContent(props) {
+  const handleLogout = async () => {
+    await logout();
+    props.navigation.replace("Login");
+  };
+
   return (
     <DrawerContentScrollView
       {...props}
@@ -156,8 +170,8 @@ function CustomDrawerContent(props) {
         <View style={styles.drawerAvatar}>
           <Ionicons name="person" size={32} color={theme.colors.primary} />
         </View>
-        <Text style={styles.drawerName}>Arthur Lima</Text>
-        <Text style={styles.drawerEmail}>arthur@exemplo.com</Text>
+        <Text style={styles.drawerName}>TaskFlow</Text>
+        <Text style={styles.drawerEmail}>Bem-vindo!</Text>
       </View>
 
       <View style={styles.drawerContent}>
@@ -186,9 +200,7 @@ function CustomDrawerContent(props) {
             <Ionicons name="log-out" size={size} color={theme.colors.error} />
           )}
           labelStyle={[styles.drawerItemLabel, { color: theme.colors.error }]}
-          onPress={() => {
-            // Implementar logout
-          }}
+          onPress={handleLogout}
         />
       </View>
     </DrawerContentScrollView>
@@ -234,7 +246,41 @@ const styles = {
   },
 };
 
+// Root Navigator with Auth Check
 export default function RootNavigator() {
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+
+  React.useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    const user = await loadUser();
+    setIsLoggedIn(user.isLoggedIn);
+    setIsLoading(false);
+  };
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {!isLoggedIn ? (
+        <Stack.Screen name="Login" component={Login} />
+      ) : (
+        <Stack.Screen name="App" component={DrawerNavigator} />
+      )}
+    </Stack.Navigator>
+  );
+}
+
+function DrawerNavigator() {
   return (
     <Drawer.Navigator
       drawerContent={(p) => <CustomDrawerContent {...p} />}
@@ -254,11 +300,7 @@ export default function RootNavigator() {
         drawerInactiveTintColor: theme.colors.textLight,
       }}
     >
-      <Drawer.Screen
-        name="App"
-        component={TabsNavigator}
-        options={{ title: "FitApp" }}
-      />
+      <Drawer.Screen name="AppTabs" component={TabsNavigator} options={{ title: "TaskFlow" }} />
       <Drawer.Screen name="Configurações" component={Settings} />
     </Drawer.Navigator>
   );

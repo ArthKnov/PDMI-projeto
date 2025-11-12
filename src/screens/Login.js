@@ -1,0 +1,170 @@
+import React from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  Image,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
+import { login } from "../storage/storage";
+import { theme } from "../theme";
+
+export default function Login({ navigation }) {
+  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+
+  const handleLogin = async () => {
+    if (!username.trim() || !password.trim()) {
+      Alert.alert("Erro", "Preencha usuário e senha");
+      return;
+    }
+
+    setLoading(true);
+    const result = await login(username.trim(), password.trim());
+    setLoading(false);
+
+    if (result.success) {
+      navigation.replace("App");
+    } else {
+      Alert.alert("Erro de Login", result.error);
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.logoContainer}>
+          <View style={styles.logoPlaceholder}>
+            <Text style={styles.logoText}>📚</Text>
+          </View>
+          <Text style={styles.appName}>TaskFlow</Text>
+          <Text style={styles.tagline}>
+            Organize suas tarefas com facilidade
+          </Text>
+        </View>
+
+        <View style={styles.formContainer}>
+          <Text style={styles.label}>Usuário</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Digite seu usuário"
+            placeholderTextColor={theme.colors.textLight}
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+
+          <Text style={styles.label}>Senha</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Digite sua senha"
+            placeholderTextColor={theme.colors.textLight}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+
+          <View style={styles.buttonContainer}>
+            <Button
+              title={loading ? "Entrando..." : "Entrar"}
+              onPress={handleLogin}
+              disabled={loading}
+              color={theme.colors.primary}
+            />
+          </View>
+
+          <Text style={styles.hint}>
+            💡 Dica: No primeiro acesso, crie seu usuário e senha
+          </Text>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    padding: theme.spacing.lg,
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: theme.spacing.xxl,
+  },
+  logoPlaceholder: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: theme.colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: theme.spacing.lg,
+    ...theme.shadows.lg,
+  },
+  logoText: {
+    fontSize: 48,
+  },
+  appName: {
+    fontSize: 32,
+    fontWeight: "800",
+    color: theme.colors.text,
+    marginBottom: theme.spacing.xs,
+  },
+  tagline: {
+    fontSize: 16,
+    color: theme.colors.textLight,
+    textAlign: "center",
+  },
+  formContainer: {
+    backgroundColor: theme.colors.card,
+    padding: theme.spacing.xl,
+    borderRadius: theme.borderRadius.lg,
+    ...theme.shadows.md,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: theme.colors.text,
+    marginBottom: theme.spacing.sm,
+  },
+  input: {
+    backgroundColor: theme.colors.background,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.md,
+    fontSize: 16,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.lg,
+  },
+  buttonContainer: {
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.lg,
+  },
+  hint: {
+    fontSize: 14,
+    color: theme.colors.textLight,
+    textAlign: "center",
+    lineHeight: 20,
+  },
+});

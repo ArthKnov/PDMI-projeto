@@ -1,163 +1,201 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
+import { loadProfile, saveProfile, loadUser, logout } from "../storage/storage";
 import { theme } from "../theme";
 
-export default function Profile() {
-  const stats = [
-    { label: "Aulas Completas", value: "24", icon: "checkmark-circle" },
-    { label: "Minutos Treinados", value: "720", icon: "time" },
-    { label: "Sequência Atual", value: "7 dias", icon: "flame" },
-    { label: "Calorias Queimadas", value: "1,200", icon: "flash" },
-  ];
+const INTEREST_OPTIONS = [
+  "Inteligência Artificial",
+  "Gestão de Projetos",
+  "Sustentabilidade",
+  "Desenvolvimento Web",
+  "Data Science",
+  "Marketing Digital",
+  "Design UX/UI",
+  "Finanças",
+];
 
-  const achievements = [
-    {
-      title: "Primeira Aula",
-      description: "Você completou sua primeira aula!",
-      icon: "star",
-      color: theme.colors.warning,
-    },
-    {
-      title: "Semana Completa",
-      description: "7 dias consecutivos de treino",
-      icon: "trophy",
-      color: theme.colors.success,
-    },
-    {
-      title: "Maratonista",
-      description: "Mais de 500 minutos treinados",
-      icon: "medal",
-      color: theme.colors.primary,
-    },
-  ];
+export default function Profile({ navigation }) {
+  const [name, setName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [selectedInterest, setSelectedInterest] = React.useState("");
+  const [interests, setInterests] = React.useState([]);
+  const [username, setUsername] = React.useState("");
 
-  const menuItems = [
-    {
-      title: "Histórico de Treinos",
-      icon: "calendar-outline",
-      color: theme.colors.primary,
-    },
-    {
-      title: "Metas e Objetivos",
-      icon: "target-outline",
-      color: theme.colors.success,
-    },
-    {
-      title: "Estatísticas",
-      icon: "stats-chart-outline",
-      color: theme.colors.accent,
-    },
-    {
-      title: "Conquistas",
-      icon: "ribbon-outline",
-      color: theme.colors.warning,
-    },
-    {
-      title: "Configurações",
-      icon: "settings-outline",
-      color: theme.colors.textLight,
-    },
-  ];
+  React.useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    const profile = await loadProfile();
+    const user = await loadUser();
+    setName(profile.name || "");
+    setEmail(profile.email || "");
+    setInterests(profile.interests || []);
+    setUsername(user.username || "");
+  };
+
+  const handleSave = async () => {
+    if (!name.trim() || !email.trim()) {
+      Alert.alert("Erro", "Preencha nome e email");
+      return;
+    }
+
+    const profile = { name: name.trim(), email: email.trim(), interests };
+    await saveProfile(profile);
+    Alert.alert("Sucesso", "Perfil salvo com sucesso!");
+  };
+
+  const handleAddInterest = () => {
+    if (!selectedInterest) {
+      Alert.alert("Atenção", "Selecione uma área de interesse");
+      return;
+    }
+    if (interests.includes(selectedInterest)) {
+      Alert.alert("Atenção", "Esta área já está na sua lista");
+      return;
+    }
+    setInterests([...interests, selectedInterest]);
+    setSelectedInterest("");
+  };
+
+  const handleRemoveInterest = (interest) => {
+    setInterests(interests.filter((i) => i !== interest));
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Sair",
+      "Deseja realmente sair?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Sair",
+          style: "destructive",
+          onPress: async () => {
+            await logout();
+            navigation.replace("Login");
+          },
+        },
+      ]
+    );
+  };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <View style={styles.container}>
       {/* Header */}
-      <View
-        style={[styles.header, { backgroundColor: theme.colors.secondary }]}
+      <View style={[styles.header, { backgroundColor: theme.colors.secondary }]}>
+        <View style={styles.avatarContainer}>
+          <View style={styles.avatar}>
+            <Ionicons name="person" size={40} color="#FFFFFF" />
+          </View>
+        </View>
+        <Text style={styles.headerTitle}>Meu Perfil</Text>
+        <Text style={styles.headerSubtitle}>@{username}</Text>
+      </View>
+
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
       >
-        <View style={styles.headerContent}>
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
-              <Ionicons name="person" size={40} color="#FFFFFF" />
-            </View>
-            <Pressable style={styles.editButton}>
-              <Ionicons name="camera" size={16} color="#FFFFFF" />
-            </Pressable>
-          </View>
+        {/* Personal Info */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Informações Pessoais</Text>
 
-          <Text style={styles.userName}>Arthur Lima</Text>
-          <Text style={styles.userEmail}>arthur@exemplo.com</Text>
+          <Text style={styles.label}>Nome Completo</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Digite seu nome"
+            placeholderTextColor={theme.colors.textLight}
+            value={name}
+            onChangeText={setName}
+          />
 
-          <View style={styles.levelBadge}>
-            <Ionicons name="star" size={16} color="#FFFFFF" />
-            <Text style={styles.levelText}>Nível Intermediário</Text>
-          </View>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Digite seu email"
+            placeholderTextColor={theme.colors.textLight}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
         </View>
-      </View>
 
-      {/* Stats Grid */}
-      <View style={styles.statsContainer}>
-        <Text style={styles.sectionTitle}>Seu Progresso</Text>
-        <View style={styles.statsGrid}>
-          {stats.map((stat, index) => (
-            <View key={index} style={styles.statCard}>
-              <View style={styles.statIcon}>
-                <Ionicons
-                  name={stat.icon}
-                  size={20}
-                  color={theme.colors.primary}
-                />
-              </View>
-              <Text style={styles.statValue}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
+        {/* Interests */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Áreas de Interesse</Text>
 
-      {/* Achievements */}
-      <View style={styles.achievementsContainer}>
-        <Text style={styles.sectionTitle}>Conquistas Recentes</Text>
-        {achievements.map((achievement, index) => (
-          <View key={index} style={styles.achievementCard}>
-            <View
-              style={[
-                styles.achievementIcon,
-                { backgroundColor: `${achievement.color}15` },
-              ]}
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={selectedInterest}
+              onValueChange={setSelectedInterest}
+              style={styles.picker}
             >
-              <Ionicons
-                name={achievement.icon}
-                size={24}
-                color={achievement.color}
-              />
-            </View>
-            <View style={styles.achievementContent}>
-              <Text style={styles.achievementTitle}>{achievement.title}</Text>
-              <Text style={styles.achievementDescription}>
-                {achievement.description}
-              </Text>
-            </View>
-            <Ionicons
-              name="checkmark-circle"
-              size={20}
-              color={theme.colors.success}
-            />
+              <Picker.Item label="Selecione uma área..." value="" />
+              {INTEREST_OPTIONS.map((option) => (
+                <Picker.Item key={option} label={option} value={option} />
+              ))}
+            </Picker>
           </View>
-        ))}
-      </View>
 
-      {/* Menu Items */}
-      <View style={styles.menuContainer}>
-        <Text style={styles.sectionTitle}>Menu</Text>
-        {menuItems.map((item, index) => (
-          <Pressable key={index} style={styles.menuItem}>
-            <View
-              style={[styles.menuIcon, { backgroundColor: `${item.color}15` }]}
-            >
-              <Ionicons name={item.icon} size={20} color={item.color} />
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={handleAddInterest}
+          >
+            <Ionicons name="add-circle" size={20} color="#FFFFFF" />
+            <Text style={styles.addButtonText}>Adicionar Interesse</Text>
+          </TouchableOpacity>
+
+          {interests.length > 0 && (
+            <View style={styles.interestsList}>
+              {interests.map((interest, index) => (
+                <View key={index} style={styles.interestChip}>
+                  <Text style={styles.interestText}>{interest}</Text>
+                  <TouchableOpacity
+                    onPress={() => handleRemoveInterest(interest)}
+                  >
+                    <Ionicons
+                      name="close-circle"
+                      size={20}
+                      color={theme.colors.error}
+                    />
+                  </TouchableOpacity>
+                </View>
+              ))}
             </View>
-            <Text style={styles.menuTitle}>{item.title}</Text>
+          )}
+        </View>
+
+        {/* Actions */}
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
+            <Text style={styles.saveButtonText}>Salvar Perfil</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <Ionicons
-              name="chevron-forward"
+              name="log-out-outline"
               size={20}
-              color={theme.colors.textLight}
+              color={theme.colors.error}
             />
-          </Pressable>
-        ))}
-      </View>
-    </ScrollView>
+            <Text style={styles.logoutButtonText}>Sair da Conta</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -168,18 +206,15 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: theme.spacing.xl,
-    paddingBottom: theme.spacing.xl,
+    paddingBottom: theme.spacing.lg,
     paddingHorizontal: theme.spacing.lg,
+    alignItems: "center",
     borderBottomLeftRadius: theme.borderRadius.xl,
     borderBottomRightRadius: theme.borderRadius.xl,
     ...theme.shadows.lg,
   },
-  headerContent: {
-    alignItems: "center",
-  },
   avatarContainer: {
-    position: "relative",
-    marginBottom: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
   },
   avatar: {
     width: 80,
@@ -191,148 +226,133 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: "#FFFFFF",
   },
-  editButton: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: theme.colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#FFFFFF",
-  },
-  userName: {
+  headerTitle: {
     fontSize: 24,
     fontWeight: "800",
     color: "#FFFFFF",
     marginBottom: theme.spacing.xs,
   },
-  userEmail: {
+  headerSubtitle: {
     fontSize: 16,
     color: "rgba(255, 255, 255, 0.8)",
-    marginBottom: theme.spacing.md,
   },
-  levelBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: theme.borderRadius.xl,
+  content: {
+    flex: 1,
   },
-  levelText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "600",
-    marginLeft: theme.spacing.xs,
-  },
-  statsContainer: {
+  scrollContent: {
     padding: theme.spacing.lg,
   },
+  section: {
+    backgroundColor: theme.colors.card,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.lg,
+    marginBottom: theme.spacing.lg,
+    ...theme.shadows.sm,
+  },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
     color: theme.colors.text,
     marginBottom: theme.spacing.lg,
   },
-  statsGrid: {
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.text,
+    marginBottom: theme.spacing.sm,
+  },
+  input: {
+    backgroundColor: theme.colors.background,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.md,
+    fontSize: 16,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.md,
+  },
+  pickerContainer: {
+    backgroundColor: theme.colors.background,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.md,
+    overflow: "hidden",
+  },
+  picker: {
+    height: 50,
+  },
+  addButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.accent,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.md,
+  },
+  addButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FFFFFF",
+    marginLeft: theme.spacing.sm,
+  },
+  interestsList: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
+    marginTop: theme.spacing.sm,
   },
-  statCard: {
-    width: "48%",
-    backgroundColor: theme.colors.card,
-    padding: theme.spacing.lg,
-    borderRadius: theme.borderRadius.lg,
+  interestChip: {
+    flexDirection: "row",
     alignItems: "center",
-    marginBottom: theme.spacing.md,
-    ...theme.shadows.sm,
-  },
-  statIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: theme.borderRadius.md,
     backgroundColor: `${theme.colors.primary}15`,
-    justifyContent: "center",
-    alignItems: "center",
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.borderRadius.xl,
+    marginRight: theme.spacing.sm,
     marginBottom: theme.spacing.sm,
   },
-  statValue: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: theme.colors.text,
-    marginBottom: theme.spacing.xs,
+  interestText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.primary,
+    marginRight: theme.spacing.sm,
   },
-  statLabel: {
-    fontSize: 12,
-    color: theme.colors.textLight,
-    textAlign: "center",
-    fontWeight: "500",
-  },
-  achievementsContainer: {
-    paddingHorizontal: theme.spacing.lg,
+  actionsContainer: {
     marginBottom: theme.spacing.xl,
   },
-  achievementCard: {
+  saveButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: theme.colors.card,
+    justifyContent: "center",
+    backgroundColor: theme.colors.success,
     padding: theme.spacing.lg,
     borderRadius: theme.borderRadius.lg,
     marginBottom: theme.spacing.md,
-    ...theme.shadows.sm,
+    ...theme.shadows.md,
   },
-  achievementIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: theme.borderRadius.md,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: theme.spacing.md,
-  },
-  achievementContent: {
-    flex: 1,
-  },
-  achievementTitle: {
+  saveButtonText: {
     fontSize: 16,
-    fontWeight: "600",
-    color: theme.colors.text,
-    marginBottom: theme.spacing.xs,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    marginLeft: theme.spacing.sm,
   },
-  achievementDescription: {
-    fontSize: 14,
-    color: theme.colors.textLight,
-    lineHeight: 20,
-  },
-  menuContainer: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.xl,
-  },
-  menuItem: {
+  logoutButton: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     backgroundColor: theme.colors.card,
     padding: theme.spacing.lg,
     borderRadius: theme.borderRadius.lg,
-    marginBottom: theme.spacing.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.error,
     ...theme.shadows.sm,
   },
-  menuIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: theme.borderRadius.md,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: theme.spacing.md,
-  },
-  menuTitle: {
-    flex: 1,
+  logoutButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: theme.colors.text,
+    color: theme.colors.error,
+    marginLeft: theme.spacing.sm,
   },
 });
+
