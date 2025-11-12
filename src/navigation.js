@@ -1,28 +1,23 @@
 import React from "react";
 import { View, Text, ActivityIndicator } from "react-native";
-import {
-  createDrawerNavigator,
-  DrawerContentScrollView,
-  DrawerItem,
-} from "@react-navigation/drawer";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
 
 import Login from "./screens/Login";
+import Register from "./screens/Register";
 import Courses from "./screens/Courses";
 import Profile from "./screens/Profile";
 import Settings from "./screens/Settings";
 import Items from "./screens/Items";
 import ItemDetail from "./screens/ItemDetail";
-import { loadUser, logout } from "./storage/storage";
+import { loadUser } from "./storage/storage";
 import { theme } from "./theme";
 
-const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
-// Stack para Itens (CASE de persistência)
+// Stack para Itens
 function ItemsStack() {
   return (
     <Stack.Navigator
@@ -39,12 +34,12 @@ function ItemsStack() {
       <Stack.Screen
         name="ListaItens"
         component={Items}
-        options={{ title: "Itens" }}
+        options={{ title: "Minhas Tarefas" }}
       />
       <Stack.Screen
         name="DetalheItem"
         component={ItemDetail}
-        options={{ title: "Editar Item" }}
+        options={{ title: "Editar Tarefa" }}
       />
     </Stack.Navigator>
   );
@@ -96,7 +91,30 @@ function ProfileStack() {
   );
 }
 
-// Tabs Navigator
+// Stack para Configurações
+function SettingsStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: theme.colors.primary,
+        },
+        headerTintColor: "#FFFFFF",
+        headerTitleStyle: {
+          fontWeight: "700",
+        },
+      }}
+    >
+      <Stack.Screen
+        name="ConfigScreen"
+        component={Settings}
+        options={{ title: "Configurações" }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+// Tabs Navigator (Tela Principal)
 function TabsNavigator() {
   return (
     <Tab.Navigator
@@ -109,7 +127,6 @@ function TabsNavigator() {
           paddingBottom: 8,
           paddingTop: 8,
           height: 60,
-          ...theme.shadows.md,
         },
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.textLight,
@@ -130,7 +147,7 @@ function TabsNavigator() {
         }}
       />
       <Tab.Screen
-        name="Itens"
+        name="Tarefas"
         component={ItemsStack}
         options={{
           tabBarIcon: ({ color, size }) => (
@@ -147,106 +164,20 @@ function TabsNavigator() {
           ),
         }}
       />
+      <Tab.Screen
+        name="Config"
+        component={SettingsStack}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="settings" size={size} color={color} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }
 
-// Custom Drawer Content
-function CustomDrawerContent(props) {
-  const handleLogout = async () => {
-    await logout();
-    props.navigation.replace("Login");
-  };
-
-  return (
-    <DrawerContentScrollView
-      {...props}
-      contentContainerStyle={{
-        flex: 1,
-        backgroundColor: theme.colors.background,
-      }}
-    >
-      <View style={styles.drawerHeader}>
-        <View style={styles.drawerAvatar}>
-          <Ionicons name="person" size={32} color={theme.colors.primary} />
-        </View>
-        <Text style={styles.drawerName}>TaskFlow</Text>
-        <Text style={styles.drawerEmail}>Bem-vindo!</Text>
-      </View>
-
-      <View style={styles.drawerContent}>
-        <DrawerItem
-          label="Aplicativo"
-          icon={({ color, size }) => (
-            <Ionicons name="apps" size={size} color={color} />
-          )}
-          labelStyle={styles.drawerItemLabel}
-          onPress={() => props.navigation.navigate("App")}
-        />
-        <DrawerItem
-          label="Configurações"
-          icon={({ color, size }) => (
-            <Ionicons name="settings" size={size} color={color} />
-          )}
-          labelStyle={styles.drawerItemLabel}
-          onPress={() => props.navigation.navigate("Configurações")}
-        />
-      </View>
-
-      <View style={styles.drawerFooter}>
-        <DrawerItem
-          label="Sair"
-          icon={({ color, size }) => (
-            <Ionicons name="log-out" size={size} color={theme.colors.error} />
-          )}
-          labelStyle={[styles.drawerItemLabel, { color: theme.colors.error }]}
-          onPress={handleLogout}
-        />
-      </View>
-    </DrawerContentScrollView>
-  );
-}
-
-const styles = {
-  drawerHeader: {
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.card,
-    marginBottom: theme.spacing.lg,
-    alignItems: "center",
-  },
-  drawerAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: `${theme.colors.primary}15`,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: theme.spacing.md,
-  },
-  drawerName: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: theme.colors.text,
-    marginBottom: theme.spacing.xs,
-  },
-  drawerEmail: {
-    fontSize: 14,
-    color: theme.colors.textLight,
-  },
-  drawerContent: {
-    flex: 1,
-  },
-  drawerItemLabel: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: theme.colors.text,
-  },
-  drawerFooter: {
-    paddingBottom: theme.spacing.lg,
-  },
-};
-
-// Root Navigator with Auth Check
+// Root Navigator com verificação de autenticação
 export default function RootNavigator() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
@@ -256,15 +187,31 @@ export default function RootNavigator() {
   }, []);
 
   const checkAuth = async () => {
-    const user = await loadUser();
-    setIsLoggedIn(user.isLoggedIn);
-    setIsLoading(false);
+    try {
+      const user = await loadUser();
+      setIsLoggedIn(user.isLoggedIn);
+    } catch (error) {
+      console.error("Erro ao verificar autenticação:", error);
+      setIsLoggedIn(false);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: theme.colors.background,
+        }}
+      >
         <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={{ marginTop: 16, color: theme.colors.textLight }}>
+          Carregando...
+        </Text>
       </View>
     );
   }
@@ -272,36 +219,13 @@ export default function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {!isLoggedIn ? (
-        <Stack.Screen name="Login" component={Login} />
+        <>
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Register" component={Register} />
+        </>
       ) : (
-        <Stack.Screen name="App" component={DrawerNavigator} />
+        <Stack.Screen name="App" component={TabsNavigator} />
       )}
     </Stack.Navigator>
-  );
-}
-
-function DrawerNavigator() {
-  return (
-    <Drawer.Navigator
-      drawerContent={(p) => <CustomDrawerContent {...p} />}
-      screenOptions={{
-        headerStyle: {
-          backgroundColor: theme.colors.primary,
-        },
-        headerTintColor: "#FFFFFF",
-        headerTitleStyle: {
-          fontWeight: "700",
-        },
-        drawerStyle: {
-          backgroundColor: theme.colors.background,
-          width: 280,
-        },
-        drawerActiveTintColor: theme.colors.primary,
-        drawerInactiveTintColor: theme.colors.textLight,
-      }}
-    >
-      <Drawer.Screen name="AppTabs" component={TabsNavigator} options={{ title: "TaskFlow" }} />
-      <Drawer.Screen name="Configurações" component={Settings} />
-    </Drawer.Navigator>
   );
 }

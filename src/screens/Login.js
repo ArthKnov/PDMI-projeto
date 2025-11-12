@@ -5,11 +5,11 @@ import {
   TextInput,
   Button,
   StyleSheet,
-  Image,
   Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import { login } from "../storage/storage";
 import { theme } from "../theme";
@@ -32,7 +32,11 @@ export default function Login({ navigation }) {
     if (result.success) {
       navigation.replace("App");
     } else {
-      Alert.alert("Erro de Login", result.error);
+      Alert.alert(
+        "Erro de Login",
+        result.error || "Usuário ou senha incorretos",
+        [{ text: "OK" }]
+      );
     }
   };
 
@@ -91,6 +95,19 @@ export default function Login({ navigation }) {
           <Text style={styles.hint}>
             💡 Dica: No primeiro acesso, crie seu usuário e senha
           </Text>
+
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>OU</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <TouchableOpacity
+            style={styles.registerButton}
+            onPress={() => navigation.navigate("Register")}
+          >
+            <Text style={styles.registerButtonText}>Criar Nova Conta</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -166,5 +183,34 @@ const styles = StyleSheet.create({
     color: theme.colors.textLight,
     textAlign: "center",
     lineHeight: 20,
+  },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: theme.spacing.lg,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: theme.colors.border,
+  },
+  dividerText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.textLight,
+    marginHorizontal: theme.spacing.md,
+  },
+  registerButton: {
+    backgroundColor: theme.colors.card,
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    alignItems: "center",
+  },
+  registerButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: theme.colors.primary,
   },
 });

@@ -54,12 +54,19 @@ export async function saveUser(user) {
 
 export async function login(username, password) {
   const user = await loadUser();
-  // Primeiro login ou credenciais corretas
-  if (!user.username || (user.username === username && user.password === password)) {
-    const newUser = { username, password, isLoggedIn: true };
-    await saveUser(newUser);
-    return { success: true, user: newUser };
+  
+  // Verifica se existe usuário cadastrado
+  if (!user.username) {
+    return { success: false, error: "Nenhuma conta encontrada. Crie uma conta primeiro." };
   }
+  
+  // Valida credenciais
+  if (user.username === username && user.password === password) {
+    const updatedUser = { ...user, isLoggedIn: true };
+    await saveUser(updatedUser);
+    return { success: true, user: updatedUser };
+  }
+  
   return { success: false, error: "Usuário ou senha incorretos" };
 }
 
