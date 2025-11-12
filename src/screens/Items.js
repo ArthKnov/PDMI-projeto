@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Text, StyleSheet, TextInput, Pressable, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  Pressable,
+  FlatList,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "../theme";
 import ItemRow from "../components/ItemRow";
@@ -63,7 +70,9 @@ export default function Items({ navigation }) {
     <View style={styles.container}>
       <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
         <Text style={styles.headerTitle}>TaskFlow</Text>
-        <Text style={styles.headerSubtitle}>Organize suas tarefas com facilidade</Text>
+        <Text style={styles.headerSubtitle}>
+          Organize suas tarefas com facilidade
+        </Text>
       </View>
 
       <View style={styles.form}>
@@ -102,7 +111,10 @@ export default function Items({ navigation }) {
         {["Todos", "Abertos", "Concluídos"].map((f) => (
           <Pressable
             key={f}
-            style={[styles.filterButton, filter === f && styles.filterButtonActive]}
+            style={[
+              styles.filterButton,
+              filter === f && styles.filterButtonActive,
+            ]}
             onPress={() => setFilter(f)}
           >
             <Text
@@ -116,7 +128,11 @@ export default function Items({ navigation }) {
           </Pressable>
         ))}
         <View style={styles.counter}>
-          <Ionicons name="checkmark-done-outline" size={16} color={theme.colors.accent} />
+          <Ionicons
+            name="checkmark-done-outline"
+            size={16}
+            color={theme.colors.accent}
+          />
           <Text style={styles.counterText}>
             {items.filter((i) => i.done).length}/{items.length}
           </Text>
@@ -126,7 +142,7 @@ export default function Items({ navigation }) {
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingBottom: 110 }]}
         renderItem={({ item }) => (
           <ItemRow
             item={item}
@@ -137,7 +153,11 @@ export default function Items({ navigation }) {
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Ionicons name="cube-outline" size={28} color={theme.colors.textLight} />
+            <Ionicons
+              name="cube-outline"
+              size={28}
+              color={theme.colors.textLight}
+            />
             <Text style={styles.emptyText}>Nenhum item por aqui.</Text>
           </View>
         }
@@ -258,5 +278,3 @@ const styles = StyleSheet.create({
     color: theme.colors.textLight,
   },
 });
-
-

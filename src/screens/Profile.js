@@ -109,7 +109,7 @@ export default function Profile() {
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 120 }]}
       >
         {/* Personal Info */}
         <View style={styles.section}>
@@ -322,7 +322,8 @@ const styles = StyleSheet.create({
     marginRight: theme.spacing.sm,
   },
   actionsContainer: {
-    marginBottom: theme.spacing.xl,
+    marginBottom: 80, // Espaço para o Tab Bar
+    paddingBottom: theme.spacing.lg,
   },
   saveButton: {
     flexDirection: "row",

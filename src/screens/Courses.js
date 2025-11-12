@@ -148,6 +148,7 @@ export default function Courses() {
       <ScrollView
         style={styles.coursesContainer}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 110 }}
       >
         <Text style={styles.resultsText}>
           {filteredCourses.length} curso{filteredCourses.length !== 1 ? "s" : ""}{" "}

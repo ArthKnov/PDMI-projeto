@@ -1,8 +1,9 @@
 import React from "react";
-import { View, Text, ActivityIndicator } from "react-native";
+import { View, Text, ActivityIndicator, Platform } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Login from "./screens/Login";
 import Register from "./screens/Register";
@@ -116,6 +117,10 @@ function SettingsStack() {
 
 // Tabs Navigator (Tela Principal)
 function TabsNavigator() {
+  const insets = useSafeAreaInsets();
+  // Altura ajustada para Android (considera barra de navegação)
+  const tabBarHeight = Platform.OS === "ios" ? 60 + (insets.bottom || 0) : 85; // Maior para Android
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -124,9 +129,15 @@ function TabsNavigator() {
           backgroundColor: theme.colors.card,
           borderTopColor: theme.colors.border,
           borderTopWidth: 1,
-          paddingBottom: 8,
-          paddingTop: 8,
-          height: 60,
+          paddingBottom:
+            Platform.OS === "ios" ? Math.max(insets.bottom, 5) : 25, // Mais espaço no Android
+          paddingTop: 10,
+          height: tabBarHeight,
+          elevation: 10,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -3 },
+          shadowOpacity: 0.15,
+          shadowRadius: 6,
         },
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.textLight,
@@ -134,6 +145,9 @@ function TabsNavigator() {
           fontSize: 12,
           fontWeight: "600",
           marginTop: 4,
+        },
+        tabBarIconStyle: {
+          marginTop: 0,
         },
       }}
     >
