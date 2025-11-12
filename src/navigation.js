@@ -11,7 +11,7 @@ import Profile from "./screens/Profile";
 import Settings from "./screens/Settings";
 import Items from "./screens/Items";
 import ItemDetail from "./screens/ItemDetail";
-import { loadUser } from "./storage/storage";
+import { useAuth } from "./AuthContext";
 import { theme } from "./theme";
 
 const Tab = createBottomTabNavigator();
@@ -179,24 +179,7 @@ function TabsNavigator() {
 
 // Root Navigator com verificação de autenticação
 export default function RootNavigator() {
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-
-  React.useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const user = await loadUser();
-      setIsLoggedIn(user.isLoggedIn);
-    } catch (error) {
-      console.error("Erro ao verificar autenticação:", error);
-      setIsLoggedIn(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { isLoggedIn, isLoading } = useAuth();
 
   if (isLoading) {
     return (

@@ -10,7 +10,9 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { loadProfile, saveProfile, loadUser, logout } from "../storage/storage";
+import { useAuth } from "../AuthContext";
 import { theme } from "../theme";
 
 const INTEREST_OPTIONS = [
@@ -24,7 +26,9 @@ const INTEREST_OPTIONS = [
   "Finanças",
 ];
 
-export default function Profile({ navigation }) {
+export default function Profile() {
+  const navigation = useNavigation();
+  const { checkAuth } = useAuth();
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [selectedInterest, setSelectedInterest] = React.useState("");
@@ -73,27 +77,26 @@ export default function Profile({ navigation }) {
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      "Sair",
-      "Deseja realmente sair?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Sair",
-          style: "destructive",
-          onPress: async () => {
-            await logout();
-            navigation.replace("Login");
-          },
+    Alert.alert("Sair", "Deseja realmente sair?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Sair",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+          // Atualiza o contexto de autenticação
+          await checkAuth();
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: theme.colors.secondary }]}>
+      <View
+        style={[styles.header, { backgroundColor: theme.colors.secondary }]}
+      >
         <View style={styles.avatarContainer}>
           <View style={styles.avatar}>
             <Ionicons name="person" size={40} color="#FFFFFF" />
@@ -355,4 +358,3 @@ const styles = StyleSheet.create({
     marginLeft: theme.spacing.sm,
   },
 });
-

@@ -10,11 +10,16 @@ import {
   Platform,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { login } from "../storage/storage";
+import { useAuth } from "../AuthContext";
 import { theme } from "../theme";
 
-export default function Login({ navigation }) {
+export default function Login() {
+  const navigation = useNavigation();
+  const { checkAuth } = useAuth();
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
@@ -25,20 +30,49 @@ export default function Login({ navigation }) {
       return;
     }
 
+    console.log("Iniciando login...");
     setLoading(true);
-    const result = await login(username.trim(), password.trim());
-    setLoading(false);
 
-    if (result.success) {
-      navigation.replace("App");
-    } else {
-      Alert.alert(
-        "Erro de Login",
-        result.error || "Usuário ou senha incorretos",
-        [{ text: "OK" }]
-      );
+    try {
+      // Delay mínimo para mostrar o loading
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      const result = await login(username.trim(), password.trim());
+      console.log("Login result:", result);
+
+      if (result.success) {
+        // Mantém loading enquanto navega
+        console.log("Login bem-sucedido, atualizando auth...");
+
+        // Atualiza o contexto de autenticação
+        await checkAuth();
+
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        setLoading(false);
+      } else {
+        setLoading(false);
+        Alert.alert(
+          "Erro de Login",
+          result.error || "Usuário ou senha incorretos",
+          [{ text: "OK" }]
+        );
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error("Erro no login:", error);
+      Alert.alert("Erro", "Ocorreu um erro ao fazer login. Tente novamente.");
     }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={styles.loadingText}>Entrando...</Text>
+        <Text style={styles.loadingSubtext}>Aguarde um momento</Text>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -115,6 +149,23 @@ export default function Login({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: theme.colors.background,
+  },
+  loadingText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: theme.colors.text,
+    marginTop: theme.spacing.lg,
+  },
+  loadingSubtext: {
+    fontSize: 14,
+    color: theme.colors.textLight,
+    marginTop: theme.spacing.sm,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
